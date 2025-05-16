@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mystery Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f0f0f;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00ff99;
+    }
+
+    #gameCanvas {
+      background: #111;
+      border: 2px solid #00ff99;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>???</h1>
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+  <div id="message">Use arrow keys...</div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const player = {
+      x: 300,
+      y: 200,
+      size: 20,
+      speed: 3,
+      color: '#00ff99'
+    };
+
+    const goal = {
+      x: Math.random() * 580 + 10,
+      y: Math.random() * 380 + 10,
+      size: 15,
+      color: '#ff0066'
+    };
+
+    let keys = {};
+
+    document.addEventListener('keydown', (e) => keys[e.key] = true);
+    document.addEventListener('keyup', (e) => keys[e.key] = false);
+
+    function update() {
+      if (keys['ArrowUp']) player.y -= player.speed;
+      if (keys['ArrowDown']) player.y += player.speed;
+      if (keys['ArrowLeft']) player.x -= player.speed;
+      if (keys['ArrowRight']) player.x += player.speed;
+
+      // Keep inside bounds
+      player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+      player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+      // Collision with goal
+      const dx = player.x - goal.x;
+      const dy = player.y - goal.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < player.size + goal.size) {
+        goal.x = Math.random() * 580 + 10;
+        goal.y = Math.random() * 380 + 10;
+        document.getElementById('message').textContent = 'Nice! Keep going...';
+      }
+    }
+
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawGoal() {
+      ctx.fillStyle = goal.color;
+      ctx.beginPath();
+      ctx.arc(goal.x, goal.y, goal.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      update();
+      drawGoal();
+      drawPlayer();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
